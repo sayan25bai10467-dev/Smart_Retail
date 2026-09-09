@@ -35,9 +35,9 @@ SmartRetail is a localized e-commerce platform and price recommendation system d
 
 ## 👨‍💻 Team & Contributions
 
-* **Sayan Manna (25BAI10467):** Frontend Development & API Integration (HTML/CSS/JS).
 * **Chirag Patil (25BAI10151):** Backend Development & AI Price Prediction Architecture (Python).
 * **Tejaswi Kumar (25BAI10736):** UI/UX Design, Database Design.
+* **Sayan Manna (25BAI10467):** Frontend Development & API Integration (HTML/CSS/JS).
 * **Suraj Bisoyi (25BAI11007):** UI/UX Design, Database Design.
 * **Prashant Patil (25BAI10809):** Presentation Design, Visual Assets & Pitch Structure.
 * **Piyush Patil (25BAI10820):** Project Management, Documentation & System Architecture Mapping.
@@ -46,5 +46,5 @@ SmartRetail is a localized e-commerce platform and price recommendation system d
 
 ## 🛠️ Development & Deployment
 
-* **Software Tools:** VS Code, Git/GitHub, Canva (UI Mockups).
+* **Software Tools:** VS Code, Git/GitHub, Canva.
 * **Hardware Requirements:** Minimum 4GB RAM workstation (Windows/macOS) for development, and a cloud-hosting capable server for deployment.
