@@ -1,4 +1,4 @@
-# 🛒 SmartRetail (SmartReatile): AI-Powered Campus Marketplace
+# 🛒 SmartRetail (SmartReatile): An AI-Driven Price Prediction System for College Campus - Exclusive Second-hand Marketplace 
 
 > **Buy. Sell. Save. Inside Your Campus.**
 
