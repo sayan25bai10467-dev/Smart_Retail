@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — SmartReatile</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+
+  <div class="auth-visual">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="auth-visual-content">
+      <div class="hero-eyebrow"><span class="dot"></span> Join your campus</div>
+      <h2>Start saving today.</h2>
+      <p>Create your account and access hundreds of student listings.</p>
+      <div class="auth-illustration">
+        <div class="floating-card card glass fc-1" style="top:0; left:0;">
+          <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80" alt="Laptop listing">
+          <div style="font-size:13px;font-weight:600">ThinkPad T480</div>
+          <div class="fc-price mt-8">₹21,000</div>
+        </div>
+        <div class="floating-card card glass fc-2" style="top:120px; right:0;">
+          <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80" alt="Book bundle listing">
+          <div style="font-size:13px;font-weight:600">DSA Book Set</div>
+          <div class="fc-price mt-8">₹650</div>
+        </div>
+      </div>
+      <div class="hero-stats mt-32">
+        <div class="hero-stat"><b>12,400+</b><span>Verified students</span></div>
+        <div class="hero-stat"><b>4.9★</b><span>Trust rating</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-side">
+    <div class="auth-box">
+      <a href="index.html" class="logo"><span class="logo-mark">🎓</span><span class="logo-text">Smart<span>Reatile</span></span></a>
+      <h1 style="margin-top:24px;">Create Account</h1>
+      <p class="form-sub text-dim">Use your college email to verify.</p>
+
+      <form id="register-form">
+        <div class="form-field">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Your name" required>
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@college.edu" required>
+        </div>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="min 6 characters" required>
+        </div>
+        <div class="form-field">
+          <label for="confirm">Confirm Password</label>
+          <input type="password" id="confirm" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-accent btn-lg" style="width:100%; margin-top:8px;">Sign Up</button>
+      </form>
+
+      <div style="text-align:center; margin-top:24px;">
+        <span class="text-dim">Already have an account? </span>
+        <a href="login.html" class="btn btn-ghost btn-sm">Log In</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { register, showToast } from './js/app.js';
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm').value;
+
+  if (!name || !email || !password || !confirm) {
+    showToast('Please fill in all fields', 'error');
+    return;
+  }
+  if (password !== confirm) {
+    showToast('Passwords do not match', 'error');
+    return;
+  }
+  if (password.length < 6) {
+    showToast('Password must be at least 6 characters', 'error');
+    return;
+  }
+
+  try {
+    await register(name, email, password);
+    window.location.href = 'dashboard.html';
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log In — SmartReatile</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <style>
+        /* ─── Page background ─── */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf5 100%);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative orbs */
+        .login-page::before,
+        .login-page::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            z-index: 0;
+        }
+        .login-page::before {
+            width: 400px;
+            height: 400px;
+            background: #6c5ce7;
+            top: -120px;
+            right: -80px;
+        }
+        .login-page::after {
+            width: 350px;
+            height: 350px;
+            background: #00b894;
+            bottom: -100px;
+            left: -60px;
+        }
+
+        /* ─── Login Card ─── */
+        .login-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 48px 40px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ─── Logo ─── */
+        .login-brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .login-brand .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #1a1a2e;
+        }
+        .login-brand .logo .logo-mark {
+            font-size: 2rem;
+        }
+        .login-brand .logo .logo-text span {
+            color: #6c5ce7;
+        }
+        .login-brand p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+
+        /* ─── Welcome text ─── */
+        .login-welcome {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-welcome h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 0 0 6px;
+        }
+        .login-welcome p {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ─── Form ─── */
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+        .login-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        .login-form .input-wrapper {
+            position: relative;
+        }
+        .login-form .input-wrapper .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+        .login-form .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            font-size: 1rem;
+            background: #f9fafb;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+            outline: none;
+            color: #1a1a2e;
+        }
+        .login-form .input-wrapper input:focus {
+            border-color: #6c5ce7;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.12);
+        }
+        .login-form .input-wrapper input::placeholder {
+            color: #b0b8c4;
+        }
+        .login-form .input-wrapper input:focus+.input-icon,
+        .login-form .input-wrapper input:focus~.input-icon {
+            color: #6c5ce7;
+        }
+
+        /* ─── Password toggle ─── */
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 4px;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            color: #6b7280;
+        }
+
+        /* ─── Extra options ─── */
+        .login-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 16px 0 24px;
+            font-size: 0.9rem;
+        }
+        .login-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4b5563;
+            cursor: pointer;
+            font-weight: 400;
+        }
+        .login-options label input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: #6c5ce7;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-options a {
+            color: #6c5ce7;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .login-options a:hover {
+            color: #5a4bd1;
+            text-decoration: underline;
+        }
+
+        /* ─── Submit button ─── */
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.25s;
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(108, 92, 231, 0.4);
+        }
+        .btn-login:active {
+            transform: scale(0.97);
+        }
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-login .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .btn-login.loading .spinner {
+            display: block;
+        }
+        .btn-login.loading .btn-text {
+            display: none;
+        }
+
+        /* ─── Divider ─── */
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        /* ─── Social buttons ─── */
+        .social-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .social-buttons .btn-social {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1a1a2e;
+            text-decoration: none;
+        }
+        .social-buttons .btn-social:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+            transform: translateY(-1px);
+        }
+        .social-buttons .btn-social svg {
+            flex-shrink: 0;
+        }
+
+        /* ─── Register link ─── */
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+        .login-footer a {
+            color: #6c5ce7;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .login-footer a:hover {
+            color: #5a4bd1;
+            text-decoration: underline;
+        }
+
+        /* ─── Error message ─── */
+        .error-msg {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-6px);
+            }
+            75% {
+                transform: translateX(6px);
+            }
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 20px 28px;
+                border-radius: 24px;
+            }
+            .login-brand .logo {
+                font-size: 1.3rem;
+            }
+            .login-welcome h2 {
+                font-size: 1.3rem;
+            }
+            .social-buttons {
+                flex-direction: column;
+            }
+            .login-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-page">
+        <div class="login-card">
+
+            <!-- Brand -->
+            <div class="login-brand">
+                <a href="index.html" class="logo">
+                    <span class="logo-mark">🎓</span>
+                    <span class="logo-text">Smart<span>Reatile</span></span>
+                </a>
+                <p>The campus marketplace</p>
+            </div>
+
+            <!-- Welcome -->
+            <div class="login-welcome">
+                <h2>Welcome back</h2>
+                <p>Log in to continue saving on campus essentials</p>
+            </div>
+
+            <!-- Error -->
+            <div id="error-msg" class="error-msg"></div>
+
+            <!-- Form -->
+            <form class="login-form" id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <input type="email" id="email" placeholder="you@college.edu" required autocomplete="email" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
+                        <button type="button" class="password-toggle" id="toggle-password" aria-label="Toggle password visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ★ FIXED: Added the missing "Remember me" checkbox and "Forgot password?" link ★ -->
+                <div class="login-options">
+                    <label>
+                        <input type="checkbox" id="remember-me" />
+                        Remember me
+                    </label>
+                    <a href="forgot-password.html">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-login" id="login-btn">
+                    <span class="btn-text">Log In</span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
+
+       ]
+          
+            
+
+            <!-- Footer -->
+            <div class="login-footer">
+                Don't have an account? <a href="register.html">Sign up for free</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ─── API base ──────────────────────────────────────────────
+        const API_BASE = 'http://localhost:8000/api';
+
+        // ─── DOM refs ──────────────────────────────────────────────
+        const form = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('toggle-password');
+        const errorEl = document.getElementById('error-msg');
+        const submitBtn = document.getElementById('login-btn');
+        const rememberCheckbox = document.getElementById('remember-me'); // now exists!
+
+        // ─── Toggle password visibility ──────────────────────────
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleBtn.innerHTML = isPassword ?
+                `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>` :
+                `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+        });
+
+        // ─── Form submit ──────────────────────────────────────────
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            // Reset error
+            errorEl.style.display = 'none';
+            errorEl.textContent = '';
+
+            // Basic validation
+            if (!email || !password) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Invalid email or password.');
+                }
+
+                // Store token
+                localStorage.setItem('authToken', data.access_token);
+
+                // Remember me — now safe because the checkbox exists!
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem('rememberEmail', email);
+                } else {
+                    localStorage.removeItem('rememberEmail');
+                }
+
+                // Redirect
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // ─── Restore remembered email ────────────────────────────
+        (function restoreEmail() {
+            const saved = localStorage.getItem('rememberEmail');
+            if (saved) {
+                emailInput.value = saved;
+                // safe because rememberCheckbox now exists
+                rememberCheckbox.checked = true;
+            }
+        })();
+    </script>
+
+</body>
+</html>

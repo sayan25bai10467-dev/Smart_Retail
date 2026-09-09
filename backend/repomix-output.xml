@@ -1,0 +1,710 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+app/
+  routes/
+    auth.py
+    orders.py
+    products.py
+    users.py
+    wishlist.py
+  utils/
+    cloudinary.py
+  __init__.py
+  auth.py
+  database.py
+  main.py
+  models.py
+requirements.txt
+run.py
+serviceAccountKey.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="app/routes/auth.py">
+from fastapi import APIRouter, HTTPException
+from datetime import datetime  # <-- ADD THIS
+from app.database import db
+from app.auth import create_jwt, hash_password, verify_password
+from app.models import UserCreate, UserLogin
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post("/register")
+async def register(user_data: UserCreate):
+    # Check if user already exists
+    existing = await db.users.find_one({"email": user_data.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed = hash_password(user_data.password)
+    user_dict = {
+        "email": user_data.email,
+        "name": user_data.name,
+        "hashed_password": hashed,
+        "created_at": datetime.utcnow()
+    }
+    result = await db.users.insert_one(user_dict)
+    user_id = str(result.inserted_id)
+
+    token = create_jwt(user_id)
+    return {"access_token": token, "token_type": "bearer", "user_id": user_id}
+
+
+@router.post("/login")
+async def login(login_data: UserLogin):
+    user = await db.users.find_one({"email": login_data.email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not verify_password(login_data.password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    user_id = str(user["_id"])
+    token = create_jwt(user_id)
+    return {"access_token": token, "token_type": "bearer", "user_id": user_id}
+</file>
+
+<file path="app/routes/orders.py">
+from fastapi import APIRouter, Depends, HTTPException
+from bson import ObjectId
+from datetime import datetime
+from app.database import db
+from app.auth import verify_jwt
+from app.models import Order
+
+router = APIRouter(prefix="/orders", tags=["orders"])
+
+def get_current_user_id(token: str = Depends(verify_jwt)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return token
+
+@router.post("/")
+async def create_order(product_id: str, user_id: str = Depends(get_current_user_id)):
+    if not ObjectId.is_valid(product_id):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+    product = await db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    seller_id = product["seller_id"]
+    if str(seller_id) == user_id:
+        raise HTTPException(status_code=400, detail="Cannot buy your own product")
+
+    # Check if already ordered (optional)
+    existing = await db.orders.find_one({
+        "product_id": ObjectId(product_id),
+        "buyer_id": ObjectId(user_id),
+        "status": {"$ne": "cancelled"}
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="You already have an active order for this product")
+
+    order = {
+        "product_id": ObjectId(product_id),
+        "buyer_id": ObjectId(user_id),
+        "seller_id": seller_id,
+        "status": "pending",
+        "created_at": datetime.utcnow()
+    }
+    result = await db.orders.insert_one(order)
+    inserted = await db.orders.find_one({"_id": result.inserted_id})
+    inserted["id"] = str(inserted["_id"])
+    inserted["product_id"] = str(inserted["product_id"])
+    inserted["buyer_id"] = str(inserted["buyer_id"])
+    inserted["seller_id"] = str(inserted["seller_id"])
+    del inserted["_id"]
+    return inserted
+
+@router.get("/")
+async def get_orders(user_id: str = Depends(get_current_user_id)):
+    cursor = db.orders.find({"buyer_id": ObjectId(user_id)})
+    orders = await cursor.to_list(length=None)
+    for o in orders:
+        o["id"] = str(o["_id"])
+        o["product_id"] = str(o["product_id"])
+        o["buyer_id"] = str(o["buyer_id"])
+        o["seller_id"] = str(o["seller_id"])
+        del o["_id"]
+    return orders
+</file>
+
+<file path="app/routes/products.py">
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from typing import Optional, List
+from bson import ObjectId
+from datetime import datetime
+
+from app.database import db
+from app.auth import verify_jwt
+from app.utils.cloudinary import upload_image
+
+router = APIRouter(prefix="/products", tags=["products"])
+
+
+def get_current_user_id(token: str = Depends(verify_jwt)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+    return token
+
+
+@router.get("/")
+async def list_products(
+    category: Optional[str] = None,
+    condition: Optional[str] = None,
+    hostel: Optional[str] = None,
+    dept: Optional[str] = None,
+    semester: Optional[str] = None,
+    search: Optional[str] = None,
+    sort: Optional[str] = "popular",
+    limit: int = 20,
+    skip: int = 0
+):
+    filter = {}
+    if category:
+        filter["category"] = category
+    if condition:
+        filter["condition"] = condition
+    if hostel:
+        filter["hostel"] = hostel
+    if dept:
+        filter["dept"] = dept
+    if semester:
+        filter["semester"] = semester
+    if search:
+        filter["$text"] = {"$search": search}
+
+    sort_options = {
+        "popular": [("created_at", -1)],
+        "recent": [("created_at", -1)],
+        "price-low": [("price", 1)],
+        "price-high": [("price", -1)]
+    }
+    sort_criteria = sort_options.get(sort, [("created_at", -1)])
+
+    cursor = db.products.find(filter).sort(sort_criteria).skip(skip).limit(limit)
+    products = await cursor.to_list(length=limit)
+    for p in products:
+        p["id"] = str(p["_id"])
+        p["seller_id"] = str(p["seller_id"])
+        del p["_id"]
+    return products
+
+
+@router.get("/{product_id}")
+async def get_product(product_id: str):
+    if not ObjectId.is_valid(product_id):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+    product = await db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    product["id"] = str(product["_id"])
+    product["seller_id"] = str(product["seller_id"])
+    del product["_id"]
+    return product
+
+
+@router.post("/")
+async def create_product(
+    title: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    mrp: Optional[float] = Form(None),
+    category: str = Form(...),
+    condition: str = Form(...),
+    negotiable: bool = Form(True),
+    dept: str = Form(...),
+    semester: str = Form(...),
+    hostel: str = Form(...),
+    pickup_location: str = Form(...),
+    images: List[UploadFile] = File([]),
+    user_id: str = Depends(get_current_user_id)
+):
+    try:
+        # Upload images to Cloudinary
+        image_urls = []
+        for img in images:
+            if img.size > 0:
+                content = await img.read()
+                url = upload_image(content)
+                image_urls.append(url)
+
+        product_data = {
+            "title": title,
+            "description": description,
+            "price": price,
+            "mrp": mrp,
+            "category": category,
+            "condition": condition,
+            "negotiable": negotiable,
+            "dept": dept,
+            "semester": semester,
+            "hostel": hostel,
+            "pickup_location": pickup_location,
+            "images": image_urls,
+            "seller_id": ObjectId(user_id),
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        result = await db.products.insert_one(product_data)
+        created_product = await db.products.find_one({"_id": result.inserted_id})
+        created_product["id"] = str(created_product["_id"])
+        created_product["seller_id"] = str(created_product["seller_id"])
+        del created_product["_id"]
+        return created_product
+
+    except Exception as e:
+        print(f"Error creating product: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+
+@router.put("/{product_id}")
+async def update_product(
+    product_id: str,
+    product_update: dict,
+    user_id: str = Depends(get_current_user_id)
+):
+    if not ObjectId.is_valid(product_id):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+    product = await db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    if str(product["seller_id"]) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this product")
+
+    product_update["updated_at"] = datetime.utcnow()
+    await db.products.update_one(
+        {"_id": ObjectId(product_id)},
+        {"$set": product_update}
+    )
+    return {"message": "Product updated"}
+
+
+@router.delete("/{product_id}")
+async def delete_product(
+    product_id: str,
+    user_id: str = Depends(get_current_user_id)
+):
+    if not ObjectId.is_valid(product_id):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+    product = await db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    if str(product["seller_id"]) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this product")
+    await db.products.delete_one({"_id": ObjectId(product_id)})
+    return {"message": "Product deleted"}
+</file>
+
+<file path="app/routes/users.py">
+from fastapi import APIRouter, Depends, HTTPException
+from bson import ObjectId
+from app.database import db
+from app.auth import verify_jwt
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+def get_current_user_id(token: str = Depends(verify_jwt)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return token
+
+@router.get("/me")
+async def get_current_user(user_id: str = Depends(get_current_user_id)):
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user["id"] = str(user["_id"])
+    del user["_id"]
+    del user["hashed_password"]   # Don't expose password hash
+    return user
+</file>
+
+<file path="app/routes/wishlist.py">
+from fastapi import APIRouter, Depends, HTTPException
+from bson import ObjectId
+from app.database import db
+from app.auth import verify_jwt
+
+router = APIRouter(prefix="/wishlist", tags=["wishlist"])
+
+def get_current_user_id(token: str = Depends(verify_jwt)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return token
+
+@router.get("/")
+async def get_wishlist(user_id: str = Depends(get_current_user_id)):
+    cursor = db.wishlists.find({"user_id": ObjectId(user_id)})
+    wishlist_items = await cursor.to_list(length=None)
+    product_ids = [item["product_id"] for item in wishlist_items]
+    products = []
+    for pid in product_ids:
+        product = await db.products.find_one({"_id": pid})
+        if product:
+            product["id"] = str(product["_id"])
+            product["seller_id"] = str(product["seller_id"])
+            del product["_id"]
+            products.append(product)
+    return products
+
+@router.post("/{product_id}")
+async def add_to_wishlist(product_id: str, user_id: str = Depends(get_current_user_id)):
+    if not ObjectId.is_valid(product_id):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+    # Check if product exists
+    product = await db.products.find_one({"_id": ObjectId(product_id)})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    # Check if already in wishlist
+    existing = await db.wishlists.find_one({
+        "user_id": ObjectId(user_id),
+        "product_id": ObjectId(product_id)
+    })
+    if existing:
+        return {"message": "Already in wishlist"}
+    await db.wishlists.insert_one({
+        "user_id": ObjectId(user_id),
+        "product_id": ObjectId(product_id)
+    })
+    return {"message": "Added to wishlist"}
+
+@router.delete("/{product_id}")
+async def remove_from_wishlist(product_id: str, user_id: str = Depends(get_current_user_id)):
+    if not ObjectId.is_valid(product_id):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+    result = await db.wishlists.delete_one({
+        "user_id": ObjectId(user_id),
+        "product_id": ObjectId(product_id)
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Wishlist item not found")
+    return {"message": "Removed from wishlist"}
+</file>
+
+<file path="app/utils/cloudinary.py">
+import cloudinary.uploader
+import cloudinary.api
+from cloudinary import config
+import os
+
+config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
+
+def upload_image(file_bytes, filename=None):
+    result = cloudinary.uploader.upload(
+        file_bytes,
+        public_id=filename or "product_images",
+        folder="smartretail"
+    )
+    return result["secure_url"]
+</file>
+
+<file path="app/__init__.py">
+
+</file>
+
+<file path="app/auth.py">
+import os
+import bcrypt
+from datetime import datetime, timedelta
+from jose import jwt, JWTError
+from dotenv import load_dotenv
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+load_dotenv()
+
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+
+security = HTTPBearer()
+
+
+def create_jwt(user_id: str) -> str:
+    payload = {
+        "sub": str(user_id),
+        "exp": datetime.utcnow() + timedelta(days=7)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload["sub"]
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+def _truncate_password(password: str) -> bytes:
+    """
+    Truncate password to 72 bytes (bcrypt limit) and return as bytes.
+    """
+    return password.encode('utf-8')[:72]
+
+
+def hash_password(password: str) -> str:
+    """
+    Hash a password using bcrypt with a generated salt.
+    Returns the hashed password as a string.
+    """
+    truncated = _truncate_password(password)
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(truncated, salt)
+    return hashed.decode('utf-8')
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verify a plain password against a bcrypt hash.
+    """
+    truncated = _truncate_password(plain_password)
+    return bcrypt.checkpw(truncated, hashed_password.encode('utf-8'))
+</file>
+
+<file path="app/database.py">
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGODB_URI")
+DB_NAME = os.getenv("DB_NAME")
+
+client = AsyncIOMotorClient(MONGO_URI)
+db = client[DB_NAME]
+</file>
+
+<file path="app/main.py">
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.routes import auth, products, users, wishlist, orders
+from app.database import db
+
+app = FastAPI(title="SmartReatile API", version="1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router, prefix="/api")
+app.include_router(products.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(wishlist.router, prefix="/api")
+app.include_router(orders.router, prefix="/api")
+
+
+@app.on_event("startup")
+async def create_indexes():
+    await db.products.create_index([("title", "text"), ("description", "text")])
+
+
+@app.get("/")
+async def root():
+    return {"message": "SmartReatile API is running"}
+</file>
+
+<file path="app/models.py">
+from typing import Optional, List, Annotated, Any
+from datetime import datetime
+from bson import ObjectId
+from pydantic import BaseModel, EmailStr, Field, GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import core_schema
+
+
+# ---------- Custom ObjectId type ----------
+class PyObjectId:
+    @classmethod
+    def __get_pydantic_core_schema__(cls, _source_type: Any, _handler: Any) -> core_schema.CoreSchema:
+        def validate_from_str(value: str) -> ObjectId:
+            if ObjectId.is_valid(value):
+                return ObjectId(value)
+            raise ValueError("Invalid ObjectId format")
+        return core_schema.union_schema([
+            core_schema.is_instance_schema(ObjectId),
+            core_schema.no_info_plain_validator_function(validate_from_str),
+        ],
+        serialization=core_schema.to_string_ser_schema(),
+        )
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, _core_schema: core_schema.CoreSchema, handler: GetJsonSchemaHandler) -> JsonSchemaValue:
+        json_schema = handler(core_schema.str_schema())
+        json_schema.update({
+            "type": "string",
+            "format": "objectid",
+            "example": "5eb7cf5a86d9755df3a6c593"
+        })
+        return json_schema
+
+
+PydanticObjectId = Annotated[ObjectId, PyObjectId]
+
+
+# ---------- User Models ----------
+class UserBase(BaseModel):
+    email: EmailStr
+    name: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class UserInDB(UserBase):
+    id: PydanticObjectId = Field(default_factory=ObjectId, alias="_id")
+    hashed_password: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+        "json_encoders": {ObjectId: str}
+    }
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+# ---------- Product Models ----------
+class ProductBase(BaseModel):
+    title: str
+    description: str
+    price: float
+    mrp: Optional[float] = None
+    category: str
+    condition: str
+    negotiable: bool = True
+    dept: str
+    semester: str
+    hostel: str
+    pickup_location: str
+    images: List[str] = []
+
+
+class ProductCreate(ProductBase):
+    pass
+
+
+class Product(ProductBase):
+    id: PydanticObjectId = Field(default_factory=ObjectId, alias="_id")
+    seller_id: PydanticObjectId
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+        "json_encoders": {ObjectId: str}
+    }
+
+
+# ---------- Wishlist Model ----------
+class WishlistItem(BaseModel):
+    user_id: PydanticObjectId
+    product_id: PydanticObjectId
+    added_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+# ---------- Order Model ----------
+class OrderBase(BaseModel):
+    product_id: PydanticObjectId
+    buyer_id: PydanticObjectId
+    seller_id: PydanticObjectId
+
+
+class Order(OrderBase):
+    id: PydanticObjectId = Field(default_factory=ObjectId, alias="_id")
+    status: str = "pending"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+        "json_encoders": {ObjectId: str}
+    }
+</file>
+
+<file path="requirements.txt">
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+motor==3.7.0
+pydantic==2.10.6
+pydantic-core==2.27.2
+python-jose[cryptography]==3.4.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.1
+google-auth==2.38.0
+cloudinary==1.44.0
+python-multipart==0.0.20
+requests==2.32.3
+email-validator==2.2.0
+firebase-admin==6.6.0
+</file>
+
+<file path="run.py">
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+</file>
+
+</files>

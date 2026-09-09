@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — SmartReatile</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <style>
+        /* ─── Profile Card ─── */
+        .profile-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s;
+        }
+        .profile-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar {
+            flex-shrink: 0;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-letter {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+            user-select: none;
+            border-radius: 50%;
+            background: #6c5ce7;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 140px;
+        }
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 2px 0;
+            color: #1a1a2e;
+        }
+        .profile-email {
+            font-size: 0.95rem;
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .profile-logout {
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .review-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 8px 16px;
+        }
+        .review-row:last-child {
+            border-bottom: 0;
+        }
+        .review-row .order-id {
+            font-weight: 500;
+            color: #1a1a2e;
+        }
+        .review-row .order-status {
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .order-status.pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .order-status.shipped {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .order-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .product-grid .text-dim {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .avatar-circle-nav {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            border: 2px solid transparent;
+        }
+        .avatar-circle-nav:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.35);
+            border-color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .profile-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+            .profile-logout {
+                margin-left: 0;
+                align-self: flex-start;
+            }
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+            }
+            .avatar-letter {
+                font-size: 26px;
+            }
+            .profile-name {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ NAVBAR ============ -->
+    <header class="navbar">
+        <div class="container nav-inner">
+            <a href="index.html" class="logo"><span class="logo-mark">🎓</span><span class="logo-text">Smart<span>Reatile</span></span></a>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="products.html">Browse</a>
+                <a href="sell.html">Sell</a>
+                <a href="dashboard.html" class="active">Dashboard</a>
+            </nav>
+            <div class="nav-search">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search for books, laptops, cycles…" />
+            </div>
+            <div class="nav-actions">
+                <!-- Login button (hidden when logged in) -->
+                <a href="login.html" class="btn btn-ghost btn-sm" id="login-btn" style="display:none;">Log In</a>
+
+                <!-- Avatar in navbar (clickable → dashboard) -->
+                <a href="dashboard.html" class="avatar-circle-nav" id="nav-avatar" style="display:none;" title="Dashboard"></a>
+
+                <a href="dashboard.html" class="btn btn-primary btn-sm" id="dashboard-btn">Dashboard</a>
+                <button class="nav-burger btn-icon" aria-label="Menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ MOBILE MENU ============ -->
+    <div class="mobile-menu glass">
+        <a href="index.html">Home</a>
+        <a href="products.html">Browse Products</a>
+        <a href="sell.html">Sell an Item</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="login.html" id="mobile-login-link" style="display:none;">Log In</a>
+        <a href="dashboard.html" id="mobile-dashboard-link">Dashboard</a>
+        <button id="mobile-logout-btn" class="btn btn-ghost btn-block mt-16" style="display:none;">Logout</button>
+    </div>
+
+    <!-- ============ PAGE HEADER ============ -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD CONTENT ============ -->
+    <section class="section" style="padding-top:0">
+        <div class="container">
+
+            <!-- Profile Card -->
+            <div class="card profile-card" style="padding:28px 32px; margin-bottom:32px;" id="user-profile">
+                <div class="profile-row">
+                    <!-- Avatar -->
+                    <div class="profile-avatar" id="profile-avatar">
+                        <img id="user-picture" src="" alt="Profile" style="display:none;" />
+                        <div class="avatar-letter" id="avatar-letter" style="display:none;"></div>
+                    </div>
+                    <!-- Info -->
+                    <div class="profile-info">
+                        <h3 id="user-name" class="profile-name">Loading...</h3>
+                        <p class="text-dim profile-email" id="user-email">Loading...</p>
+                    </div>
+                    <button id="logout-btn" class="btn btn-ghost btn-sm profile-logout">Logout</button>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div class="section-head"><h2>Your Orders</h2></div>
+            <div id="orders-list" class="card" style="padding:20px; margin-bottom:40px;">Loading orders...</div>
+
+            <!-- Wishlist -->
+            <div class="section-head"><h2>Your Wishlist</h2></div>
+            <div class="product-grid" id="wishlist-grid">
+                <div class="text-dim" style="padding:20px; text-align:center;">Loading wishlist...</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============ FLOATING BUTTONS ============ -->
+    <button class="back-top btn-icon glass" aria-label="Back to top">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
+    <a href="sell.html" class="fab-sell">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Sell Item</span>
+    </a>
+
+    <script type="module">
+        // ─── Dynamic API base (uses the same host, port 8000) ───
+        const API_BASE = (() => {
+            const { protocol, hostname } = window.location;
+            return `${protocol}//${hostname}:8000/api`;
+        })();
+
+        // ─── Helpers ──────────────────────────────────────────────
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0].charAt(0);
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        }
+
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hue = Math.abs(hash) % 360;
+            return `hsl(${hue}, 70%, 55%)`;
+        }
+
+        function showToast(msg, type = 'info') {
+            console.log(`[${type}] ${msg}`);
+        }
+
+        function getToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        function removeToken() {
+            localStorage.removeItem('authToken');
+        }
+
+        async function authFetch(url, options = {}) {
+            const token = getToken();
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            const response = await fetch(url, { ...options, headers });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            return response;
+        }
+
+        async function checkAuth() {
+            const token = getToken();
+            if (!token) return null;
+            try {
+                const res = await authFetch(`${API_BASE}/users/me`);
+                const user = await res.json();
+                return user;
+            } catch (err) {
+                console.warn('Auth check failed:', err);
+                return null;
+            }
+        }
+
+        function logout() {
+            removeToken();
+            window.location.href = 'login.html';
+        }
+
+        function renderProductGrid(containerId, products) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!products || products.length === 0) {
+                container.innerHTML = `<div class="text-dim" style="grid-column:1/-1;padding:40px 0;text-align:center;">Your wishlist is empty.</div>`;
+                return;
+            }
+
+            container.innerHTML = products.map(p => `
+                <div class="product-card" style="border:1px solid #eee;border-radius:16px;padding:12px;text-align:center;background:#fff;transition:0.2s;">
+                    <img src="${p.images && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/160'}" alt="${p.title}" style="width:100%;height:120px;object-fit:cover;border-radius:12px;margin-bottom:8px;" />
+                    <div style="font-weight:500;font-size:0.95rem;">${p.title}</div>
+                    <div style="color:#2563eb;font-weight:600;margin-top:4px;">₹${p.price.toFixed(2)}</div>
+                    <button class="btn btn-primary btn-sm" style="margin-top:8px;">Add to Cart</button>
+                </div>
+            `).join('');
+        }
+
+        // ─── Main ───────────────────────────────────────────────────
+        (async function init() {
+            const user = await checkAuth();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Navbar avatar
+            const navAvatar = document.getElementById('nav-avatar');
+            const loginBtn = document.getElementById('login-btn');
+            if (user.name) {
+                const initial = getInitials(user.name);
+                navAvatar.textContent = initial;
+                navAvatar.style.background = stringToColor(user.name);
+                navAvatar.style.display = 'inline-flex';
+                loginBtn.style.display = 'none';
+            }
+
+            // Logout handlers
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('mobile-logout-btn').addEventListener('click', logout);
+
+            // Profile
+            const nameEl = document.getElementById('user-name');
+            const emailEl = document.getElementById('user-email');
+            const pictureEl = document.getElementById('user-picture');
+            const letterEl = document.getElementById('avatar-letter');
+
+            const name = user.name || 'User';
+            const email = user.email || '';
+            const picture = user.picture || '';
+
+            nameEl.textContent = name;
+            emailEl.textContent = email;
+
+            if (picture && picture.trim() !== '') {
+                pictureEl.src = picture;
+                pictureEl.style.display = 'block';
+                letterEl.style.display = 'none';
+            } else {
+                pictureEl.style.display = 'none';
+                const initial = getInitials(name);
+                letterEl.textContent = initial;
+                letterEl.style.background = stringToColor(name);
+                letterEl.style.display = 'flex';
+            }
+
+            // Orders
+            try {
+                const res = await authFetch(`${API_BASE}/orders`);
+                const orders = await res.json();
+                const container = document.getElementById('orders-list');
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `<p class="text-dim" style="padding:8px 0;">No orders yet.</p>`;
+                } else {
+                    container.innerHTML = orders.map(o => {
+                        const statusClass = o.status === 'pending' ? 'pending' :
+                                           o.status === 'shipped' ? 'shipped' : '';
+                        return `
+                            <div class="review-row">
+                                <span class="order-id">Order #${o.id.substring(0, 8)}</span>
+                                <span class="order-status ${statusClass}">${o.status || 'Placed'}</span>
+                                <span class="order-date">${new Date(o.created_at).toLocaleDateString()}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                showToast('Failed to load orders: ' + err.message, 'error');
+                document.getElementById('orders-list').innerHTML =
+                    `<p class="text-dim" style="padding:8px 0;">Could not load orders. Please try again later.</p>`;
+            }
+
+            // Wishlist
+            try {
+                const res = await authFetch(`${API_BASE}/wishlist`);
+                const products = await res.json();
+                renderProductGrid('wishlist-grid', products);
+            } catch (err) {
+                showToast('Failed to load wishlist: ' + err.message, 'error');
+                document.getElementById('wishlist-grid').innerHTML =
+                    `<div class="text-dim" style="grid-column:1/-1;padding:40px 0;text-align:center;">Could not load wishlist.</div>`;
+            }
+        })();
+    </script>
+
+</body>
+</html>

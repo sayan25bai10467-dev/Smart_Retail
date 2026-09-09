@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell an Item — SmartReatile</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">🎓</span><span class="logo-text">Smart<span>Reatile</span></span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Browse</a>
+      <a href="sell.html" class="active">Sell</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+    <div class="nav-search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search for books, laptops, cycles…">
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm" id="login-btn">Log In</a>
+      <a href="dashboard.html" class="btn btn-primary btn-sm" id="dashboard-btn" style="display:none;">Dashboard</a>
+      <button class="nav-burger btn-icon" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu glass">
+  <a href="index.html">Home</a>
+  <a href="products.html">Browse Products</a>
+  <a href="sell.html">Sell an Item</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="login.html" id="mobile-login-link">Log In</a>
+  <a href="dashboard.html" id="mobile-dashboard-link" style="display:none;">Dashboard</a>
+  <button id="mobile-logout-btn" class="btn btn-ghost btn-block mt-16" style="display:none;">Logout</button>
+</div>
+
+<div class="page-header" style="text-align:center">
+  <div class="container">
+    <div class="eyebrow" style="justify-content:center; display:flex">List in under 3 minutes</div>
+    <h1>Sell your item</h1>
+    <p class="text-dim mt-8">Reach thousands of verified students on your campus, for free.</p>
+  </div>
+</div>
+
+<section class="section" style="padding-top:20px">
+  <div class="container sell-wrap">
+
+    <div class="stepper">
+      <div class="step-dot active" data-step="1"><div class="circle">1</div><span class="label">Photos</span></div>
+      <div class="step-line"></div>
+      <div class="step-dot" data-step="2"><div class="circle">2</div><span class="label">Details</span></div>
+      <div class="step-line"></div>
+      <div class="step-dot" data-step="3"><div class="circle">3</div><span class="label">Location</span></div>
+      <div class="step-line"></div>
+      <div class="step-dot" data-step="4"><div class="circle">4</div><span class="label">Review</span></div>
+    </div>
+
+    <form id="sell-form" enctype="multipart/form-data">
+      <!-- STEP 1: PHOTOS -->
+      <div class="step-panel active card form-panel" data-panel="1">
+        <h3>Add photos</h3>
+        <p class="form-sub">Listings with 3+ clear photos sell up to 2x faster.</p>
+
+        <div class="drop-zone" id="drop-zone">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Drag & drop images here, or click to browse</p>
+          <span>PNG or JPG, up to 5 images</span>
+          <input type="file" id="file-input" accept="image/*" multiple hidden>
+        </div>
+        <div class="preview-grid" id="preview-grid"></div>
+      </div>
+
+      <!-- STEP 2: DETAILS -->
+      <div class="step-panel card form-panel" data-panel="2">
+        <h3>Item details</h3>
+        <p class="form-sub">Give buyers enough detail to trust the listing at a glance.</p>
+
+        <div class="form-field">
+          <label for="title">Product title</label>
+          <input type="text" id="title" placeholder="e.g. Casio FX-991ES Plus Calculator" required>
+        </div>
+
+        <div class="form-field">
+          <label for="desc">Description</label>
+          <textarea id="desc" placeholder="Describe condition, usage, reason for selling…"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field" style="margin-bottom:0">
+            <label for="category">Category</label>
+            <select id="category">
+              <option>Books</option><option>Electronics</option><option>Laptop Accessories</option>
+              <option>Calculators</option><option>Furniture</option><option>Hostel Essentials</option>
+              <option>Sports Equipment</option><option>Cycles</option><option>Clothing</option><option>Shoes</option>
+              <option>Lab Equipment</option><option>Engineering Drawing Tools</option><option>Notes</option>
+              <option>Gaming Accessories</option><option>Kitchen Items</option><option>Musical Instruments</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <label for="condition">Condition</label>
+            <select id="condition">
+              <option>Excellent</option><option>Like New</option><option>Good</option><option>Fair</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field" style="margin-bottom:0">
+            <label for="price">Price (₹)</label>
+            <input type="number" id="price" placeholder="e.g. 650" required>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <label for="mrp">Original price (₹)</label>
+            <input type="number" id="mrp" placeholder="e.g. 1800">
+          </div>
+        </div>
+
+        <div class="toggle-row mt-16">
+          <div>
+            <b style="font-size:14px">Price negotiable</b>
+            <div class="form-hint" style="margin-top:2px">Let buyers know you're open to offers</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="negotiable" checked><span class="slider-toggle"></span></label>
+        </div>
+      </div>
+
+      <!-- STEP 3: LOCATION -->
+      <div class="step-panel card form-panel" data-panel="3">
+        <h3>Where can buyers find you?</h3>
+        <p class="form-sub">This helps match your listing to nearby students.</p>
+
+        <div class="form-row">
+          <div class="form-field" style="margin-bottom:0">
+            <label for="dept">Department</label>
+            <select id="dept">
+              <option>Computer Science</option><option>Electronics</option><option>Mechanical</option>
+              <option>Civil</option><option>Any</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <label for="semester">Semester</label>
+            <select id="semester">
+              <option>1st Semester</option><option>2nd Semester</option><option>3rd Semester</option>
+              <option>4th Semester</option><option>5th Semester</option><option>6th Semester</option>
+              <option>7th Semester</option><option>8th Semester</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field" style="margin-bottom:0">
+            <label for="hostel">Hostel / Block</label>
+            <select id="hostel">
+              <option>Block A</option><option>Block B</option><option>Block C</option><option>Block D</option><option>Day Scholar</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <label for="pickup">Pickup location</label>
+            <input type="text" id="pickup" placeholder="e.g. Main gate, Library">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: REVIEW -->
+      <div class="step-panel card form-panel" data-panel="4">
+        <h3>Review your listing</h3>
+        <p class="form-sub">Make sure everything looks right before publishing.</p>
+        <div id="review-body"></div>
+      </div>
+
+      <div class="form-nav">
+        <button type="button" class="btn btn-ghost" id="prev-btn" style="visibility:hidden">Back</button>
+        <button type="button" class="btn btn-primary" id="next-btn">Continue</button>
+        <button type="submit" class="btn btn-accent hidden" id="publish-btn">Publish Listing</button>
+      </div>
+    </form>
+
+  </div>
+</section>
+
+<button class="back-top btn-icon glass" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</button>
+
+<script type="module">
+// --- IMPORT API_BASE DIRECTLY ---
+import { API_BASE, checkAuth, logout, authFetch, showToast } from './js/app.js';
+
+// Auth check for nav
+(async function() {
+  const user = await checkAuth();
+  const loginBtn = document.getElementById('login-btn');
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  const mobileLogin = document.getElementById('mobile-login-link');
+  const mobileDashboard = document.getElementById('mobile-dashboard-link');
+  const mobileLogout = document.getElementById('mobile-logout-btn');
+  if (user) {
+    loginBtn.style.display = 'none';
+    dashboardBtn.style.display = 'inline-flex';
+    mobileLogin.style.display = 'none';
+    mobileDashboard.style.display = 'block';
+    mobileLogout.style.display = 'block';
+    mobileLogout.addEventListener('click', logout);
+  } else {
+    loginBtn.style.display = 'inline-flex';
+    dashboardBtn.style.display = 'none';
+    mobileLogin.style.display = 'block';
+    mobileDashboard.style.display = 'none';
+    mobileLogout.style.display = 'none';
+  }
+})();
+
+// ======== Sell form logic ========
+const panels = [...document.querySelectorAll('.step-panel')];
+const dots = [...document.querySelectorAll('.step-dot')];
+const lines = [...document.querySelectorAll('.step-line')];
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const publishBtn = document.getElementById('publish-btn');
+let step = 1;
+const total = panels.length;
+let imageFiles = [];
+
+function goTo(n){
+  step = n;
+  panels.forEach(p => p.classList.toggle('active', Number(p.dataset.panel) === step));
+  dots.forEach(d => {
+    const dn = Number(d.dataset.step);
+    d.classList.toggle('active', dn === step);
+    d.classList.toggle('done', dn < step);
+  });
+  lines.forEach((l, i) => l.classList.toggle('done', i < step - 1));
+  prevBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+  nextBtn.classList.toggle('hidden', step === total);
+  publishBtn.classList.toggle('hidden', step !== total);
+  if(step === total) buildReview();
+  window.scrollTo({ top: document.querySelector('.sell-wrap').offsetTop - 100, behavior:'smooth' });
+}
+
+function buildReview(){
+  const val = id => document.getElementById(id)?.value || '—';
+  const rows = [
+    ['Title', val('title')],
+    ['Category', val('category')],
+    ['Condition', val('condition')],
+    ['Price', '₹' + (val('price') !== '—' ? val('price') : '0')],
+    ['Negotiable', document.getElementById('negotiable').checked ? 'Yes' : 'No'],
+    ['Department', val('dept')],
+    ['Semester', val('semester')],
+    ['Hostel', val('hostel')],
+    ['Pickup Location', val('pickup')],
+    ['Photos added', imageFiles.length + ' image(s)'],
+  ];
+  document.getElementById('review-body').innerHTML = rows.map(([k,v]) => `
+    <div class="review-row"><span>${k}</span><b>${v}</b></div>`).join('');
+}
+
+nextBtn.addEventListener('click', () => {
+  if(step === 2 && !document.getElementById('title').value.trim()){
+    showToast('Please add a product title', 'error'); return;
+  }
+  if(step === 2 && !document.getElementById('price').value){
+    showToast('Please set a price', 'error'); return;
+  }
+  if(step < total) goTo(step + 1);
+});
+prevBtn.addEventListener('click', () => { if(step > 1) goTo(step - 1); });
+
+// File upload
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const previewGrid = document.getElementById('preview-grid');
+
+dropZone.addEventListener('click', () => fileInput.click());
+['dragenter','dragover'].forEach(evt => dropZone.addEventListener(evt, e => {
+  e.preventDefault(); dropZone.classList.add('drag-over');
+}));
+['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+}));
+dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(fileList){
+  [...fileList].slice(0, 5 - imageFiles.length).forEach(file => {
+    if(!file.type.startsWith('image/')) return;
+    imageFiles.push(file);
+    const url = URL.createObjectURL(file);
+    renderPreviews();
+  });
+  if(fileList.length) showToast(`${Math.min(fileList.length, 5-imageFiles.length+fileList.length)} image(s) added`, 'success', 2000);
+}
+
+function renderPreviews(){
+  previewGrid.innerHTML = imageFiles.map((file, i) => `
+    <div class="preview-thumb">
+      <img src="${URL.createObjectURL(file)}" alt="Preview ${i+1}">
+      <button type="button" data-i="${i}" aria-label="Remove image">✕</button>
+    </div>`).join('');
+  previewGrid.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      imageFiles.splice(Number(btn.dataset.i), 1);
+      renderPreviews();
+    });
+  });
+}
+
+// Submit
+document.getElementById('sell-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('jwt');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', document.getElementById('title').value);
+  formData.append('description', document.getElementById('desc').value);
+  formData.append('price', document.getElementById('price').value);
+  formData.append('mrp', document.getElementById('mrp').value || '');
+  formData.append('category', document.getElementById('category').value);
+  formData.append('condition', document.getElementById('condition').value);
+  formData.append('negotiable', document.getElementById('negotiable').checked ? 'true' : 'false');
+  formData.append('dept', document.getElementById('dept').value);
+  formData.append('semester', document.getElementById('semester').value);
+  formData.append('hostel', document.getElementById('hostel').value);
+  formData.append('pickup_location', document.getElementById('pickup').value);
+
+  imageFiles.forEach(file => formData.append('images', file));
+
+  try {
+    // Use API_BASE from import
+    const res = await fetch(`${API_BASE}/products`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+
+    if (!res.ok) {
+      let errorMsg = 'Failed to publish';
+      try {
+        const errData = await res.json();
+        errorMsg = errData.detail || errorMsg;
+      } catch (_) {
+        // response might not be JSON; read as text
+        const text = await res.text();
+        if (text) errorMsg = text;
+      }
+      throw new Error(errorMsg);
+    }
+
+    const data = await res.json();
+    showToast('Listing published successfully!', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 900);
+  } catch (err) {
+    console.error(err);
+    showToast(err.message, 'error');
+  }
+});
+
+goTo(1);
+</script>
+</body>
+</html>

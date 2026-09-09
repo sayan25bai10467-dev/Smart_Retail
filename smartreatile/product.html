@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Product Details — SmartReatile</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">🎓</span><span class="logo-text">Smart<span>Reatile</span></span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Browse</a>
+      <a href="sell.html">Sell</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+    <div class="nav-search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search for books, laptops, cycles…">
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm" id="login-btn">Log In</a>
+      <a href="dashboard.html" class="btn btn-primary btn-sm" id="dashboard-btn" style="display:none;">Dashboard</a>
+      <button class="nav-burger btn-icon" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu glass">
+  <a href="index.html">Home</a>
+  <a href="products.html">Browse Products</a>
+  <a href="sell.html">Sell an Item</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="login.html" id="mobile-login-link">Log In</a>
+  <a href="dashboard.html" id="mobile-dashboard-link" style="display:none;">Dashboard</a>
+  <button id="mobile-logout-btn" class="btn btn-ghost btn-block mt-16" style="display:none;">Logout</button>
+</div>
+
+<div class="page-header" style="padding-bottom:8px">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <a href="products.html">Browse</a> / <span id="crumb-title">Product</span></div>
+  </div>
+</div>
+
+<section class="section" style="padding-top:16px" id="pd-root">
+  <div class="container">
+    <div class="pd-layout" id="pd-layout"><!-- injected by product.js --></div>
+
+    <div class="mt-32" style="margin-top:72px">
+      <div class="section-head reveal">
+        <div>
+          <div class="eyebrow">You might also like</div>
+          <h2 class="section-title">Recommended for you</h2>
+        </div>
+      </div>
+      <div class="product-grid" id="recommended-grid"></div>
+    </div>
+  </div>
+</section>
+
+<button class="back-top btn-icon glass" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</button>
+<a href="sell.html" class="fab-sell">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  <span>Sell Item</span>
+</a>
+
+<script type="module">
+import { getProductById, getProducts, renderProductGrid } from './js/products.js';
+import { checkAuth, logout, authFetch, showToast } from './js/app.js';
+
+// Auth check for nav
+(async function() {
+  const user = await checkAuth();
+  const loginBtn = document.getElementById('login-btn');
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  const mobileLogin = document.getElementById('mobile-login-link');
+  const mobileDashboard = document.getElementById('mobile-dashboard-link');
+  const mobileLogout = document.getElementById('mobile-logout-btn');
+  if (user) {
+    loginBtn.style.display = 'none';
+    dashboardBtn.style.display = 'inline-flex';
+    mobileLogin.style.display = 'none';
+    mobileDashboard.style.display = 'block';
+    mobileLogout.style.display = 'block';
+    mobileLogout.addEventListener('click', logout);
+  } else {
+    loginBtn.style.display = 'inline-flex';
+    dashboardBtn.style.display = 'none';
+    mobileLogin.style.display = 'block';
+    mobileDashboard.style.display = 'none';
+    mobileLogout.style.display = 'none';
+  }
+})();
+
+const id = new URLSearchParams(location.search).get('id');
+if (!id) {
+  showToast('Product not found', 'error');
+  window.location.href = 'products.html';
+}
+const p = await getProductById(id);
+document.getElementById('page-title').textContent = p.title + ' — SmartReatile';
+document.getElementById('crumb-title').textContent = p.title;
+
+const gallery = p.images && p.images.length ? p.images : ['https://via.placeholder.com/600'];
+
+document.getElementById('pd-layout').innerHTML = `
+  <div class="pd-gallery reveal">
+    <div class="pd-main-img card" id="pd-main-img">
+      <img src="${gallery[0]}" alt="${p.title}" id="pd-main-img-tag">
+    </div>
+    <div class="pd-thumbs">
+      ${gallery.map((src, i) => `<div class="pd-thumb ${i===0?'active':''}" data-src="${src}"><img src="${src}" alt="thumbnail ${i+1}"></div>`).join('')}
+    </div>
+  </div>
+
+  <div class="pd-info reveal reveal-delay-1">
+    <div class="pd-badges">
+      <span class="badge badge-neutral">${p.condition}</span>
+      ${p.negotiable ? '<span class="badge badge-new">Negotiable</span>' : ''}
+    </div>
+    <h1 class="pd-title">${p.title}</h1>
+    <div class="pd-price-row">
+      <span class="pd-price">₹${p.price.toLocaleString('en-IN')}</span>
+      ${p.mrp ? `<span class="pd-mrp">₹${p.mrp.toLocaleString('en-IN')}</span>` : ''}
+      ${p.mrp ? `<span class="pd-discount">${Math.round((1 - p.price/p.mrp)*100)}% off store price</span>` : ''}
+    </div>
+
+    <div class="pd-info-grid card">
+      <div class="pd-info-item"><span>Category</span><b>${p.category}</b></div>
+      <div class="pd-info-item"><span>Department</span><b>${p.dept}</b></div>
+      <div class="pd-info-item"><span>Semester</span><b>${p.semester}</b></div>
+      <div class="pd-info-item"><span>Posted</span><b>${new Date(p.created_at).toLocaleDateString()}</b></div>
+      <div class="pd-info-item"><span>Location</span><b>${p.hostel}</b></div>
+      <div class="pd-info-item"><span>Condition</span><b>${p.condition}</b></div>
+    </div>
+
+    <h4 style="font-size:14px; margin-top:22px">Description</h4>
+    <p class="pd-desc">${p.description}</p>
+
+    <div class="pd-actions">
+      <button class="btn btn-primary btn-lg" id="buy-now-btn" style="flex:1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Buy Now (Cash on Delivery)
+      </button>
+      <button class="btn btn-ghost btn-lg" id="save-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        Save
+      </button>
+      <button class="btn-icon" id="share-btn" aria-label="Share" style="width:52px;height:52px;border:1px solid var(--border-strong)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+      </button>
+    </div>
+
+    <div class="seller-card card">
+      <div class="seller-top">
+        <img src="https://via.placeholder.com/56" alt="Seller">
+        <div>
+          <b>Seller</b>
+          <span>${p.dept} · ${p.semester}</span>
+        </div>
+      </div>
+      <div class="seller-stats">
+        <div class="seller-stat"><b>4.8★</b><span>Rating</span></div>
+        <div class="seller-stat"><b>18</b><span>Items Sold</span></div>
+        <div class="seller-stat"><b>~2 hrs</b><span>Response Time</span></div>
+      </div>
+    </div>
+  </div>
+`;
+
+// Thumbnail swap
+document.querySelectorAll('.pd-thumb').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.pd-thumb').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pd-main-img-tag').src = t.dataset.src;
+  });
+});
+
+// Buy Now (order)
+document.getElementById('buy-now-btn').addEventListener('click', async () => {
+  const token = localStorage.getItem('jwt');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+  try {
+    const res = await authFetch(`${window.API_BASE}/orders?product_id=${p.id}`, { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Order failed');
+    }
+    showToast('Order placed! (Cash on delivery)', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+// Save to wishlist
+document.getElementById('save-btn').addEventListener('click', async () => {
+  const token = localStorage.getItem('jwt');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+  try {
+    const res = await authFetch(`${window.API_BASE}/wishlist/${p.id}`, { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Failed to save');
+    }
+    showToast('Added to wishlist', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
+// Share
+document.getElementById('share-btn').addEventListener('click', () => {
+  navigator.clipboard?.writeText(window.location.href);
+  showToast('Link copied to clipboard', 'success');
+});
+
+// Recommended products
+const recs = await getProducts({ category: p.category, limit: 4 });
+renderProductGrid('recommended-grid', recs.filter(x => x.id !== p.id).slice(0,4));
+</script>
+</body>
+</html>

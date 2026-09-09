@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Products — SmartReatile</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">🎓</span><span class="logo-text">Smart<span>Reatile</span></span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active">Browse</a>
+      <a href="sell.html">Sell</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+    <div class="nav-search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search-input" placeholder="Search for books, laptops, cycles…">
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm" id="login-btn">Log In</a>
+      <a href="dashboard.html" class="btn btn-primary btn-sm" id="dashboard-btn" style="display:none;">Dashboard</a>
+      <button class="nav-burger btn-icon" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu glass">
+  <a href="index.html">Home</a>
+  <a href="products.html">Browse Products</a>
+  <a href="sell.html">Sell an Item</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="login.html" id="mobile-login-link">Log In</a>
+  <a href="dashboard.html" id="mobile-dashboard-link" style="display:none;">Dashboard</a>
+  <button id="mobile-logout-btn" class="btn btn-ghost btn-block mt-16" style="display:none;">Logout</button>
+</div>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <span>Browse Products</span></div>
+    <h1>Browse Products</h1>
+    <p class="text-dim mt-8">Every listing here is from a verified student at your campus.</p>
+  </div>
+</div>
+
+<section class="section" style="padding-top:24px">
+  <div class="container browse-layout">
+
+    <!-- FILTER SIDEBAR -->
+    <aside class="filters card" id="filters-panel">
+      <div class="flex justify-between items-center" style="margin-bottom:6px">
+        <h3 style="font-size:16px">Filters</h3>
+        <button class="link-more" id="clear-filters" style="font-size:13px">Clear all</button>
+      </div>
+
+      <div class="filter-group">
+        <h4>Category</h4>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Books"> Books</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Electronics"> Electronics</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Calculators"> Calculators</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Furniture"> Furniture</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Cycles"> Cycles</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Hostel Essentials"> Hostel Essentials</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Lab Equipment"> Lab Equipment</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Notes"> Notes</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Gaming Accessories"> Gaming Accessories</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Clothing"> Clothing</label>
+        <label class="filter-opt"><input type="checkbox" name="category" value="Musical Instruments"> Musical Instruments</label>
+      </div>
+
+      <div class="filter-group">
+        <h4>Price Range</h4>
+        <div class="range-row">
+          <input type="number" id="price-min" placeholder="Min">
+          <span class="text-dim">—</span>
+          <input type="number" id="price-max" placeholder="Max">
+        </div>
+        <input type="range" id="price-slider" min="0" max="25000" value="25000">
+      </div>
+
+      <div class="filter-group">
+        <h4>Condition</h4>
+        <label class="filter-opt"><input type="checkbox" name="condition" value="Excellent"> Excellent</label>
+        <label class="filter-opt"><input type="checkbox" name="condition" value="Like New"> Like New</label>
+        <label class="filter-opt"><input type="checkbox" name="condition" value="Good"> Good</label>
+      </div>
+
+      <div class="filter-group">
+        <h4>Department</h4>
+        <select class="sort-select" style="width:100%" id="filter-dept">
+          <option value="">All Departments</option>
+          <option>Computer Science</option>
+          <option>Electronics</option>
+          <option>Mechanical</option>
+          <option>Any</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <h4>Semester</h4>
+        <select class="sort-select" style="width:100%" id="filter-sem">
+          <option value="">Any Semester</option>
+          <option>1st Semester</option><option>2nd Semester</option><option>3rd Semester</option>
+          <option>4th Semester</option><option>5th Semester</option><option>6th Semester</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <h4>Hostel</h4>
+        <label class="filter-opt"><input type="checkbox" name="hostel" value="Block A"> Block A</label>
+        <label class="filter-opt"><input type="checkbox" name="hostel" value="Block B"> Block B</label>
+        <label class="filter-opt"><input type="checkbox" name="hostel" value="Block C"> Block C</label>
+        <label class="filter-opt"><input type="checkbox" name="hostel" value="Block D"> Block D</label>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="apply-filters">Apply Filters</button>
+    </aside>
+
+    <!-- RESULTS -->
+    <div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-ghost btn-sm mobile-filter-toggle" id="open-filters">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            Filters
+          </button>
+          <span class="result-count" id="result-count">Loading results…</span>
+        </div>
+        <div class="toolbar-left">
+          <select class="sort-select" id="sort-select">
+            <option value="popular">Sort: Most Popular</option>
+            <option value="recent">Sort: Newest First</option>
+            <option value="price-low">Sort: Price — Low to High</option>
+            <option value="price-high">Sort: Price — High to Low</option>
+          </select>
+          <div class="view-toggle">
+            <button class="active" id="grid-view-btn" aria-label="Grid view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </button>
+            <button id="list-view-btn" aria-label="List view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip-row" id="active-chips"></div>
+
+      <div class="product-grid" id="results-grid"></div>
+
+      <div class="load-more-wrap">
+        <button class="btn btn-ghost" id="load-more-btn">
+          <span class="spinner hidden" id="load-spinner"></span>
+          <span id="load-more-text">Load more products</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="filters-backdrop" id="filters-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1100;"></div>
+
+<button class="back-top btn-icon glass" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</button>
+<a href="sell.html" class="fab-sell">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  <span>Sell Item</span>
+</a>
+
+<script type="module">
+import './js/app.js'; // for auth check
+import { checkAuth, logout } from './js/app.js';
+import { getProducts, renderProductGrid } from './js/products.js';
+
+// Auth check for nav
+(async function() {
+  const user = await checkAuth();
+  const loginBtn = document.getElementById('login-btn');
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  const mobileLogin = document.getElementById('mobile-login-link');
+  const mobileDashboard = document.getElementById('mobile-dashboard-link');
+  const mobileLogout = document.getElementById('mobile-logout-btn');
+  if (user) {
+    loginBtn.style.display = 'none';
+    dashboardBtn.style.display = 'inline-flex';
+    mobileLogin.style.display = 'none';
+    mobileDashboard.style.display = 'block';
+    mobileLogout.style.display = 'block';
+    mobileLogout.addEventListener('click', logout);
+  } else {
+    loginBtn.style.display = 'inline-flex';
+    dashboardBtn.style.display = 'none';
+    mobileLogin.style.display = 'block';
+    mobileDashboard.style.display = 'none';
+    mobileLogout.style.display = 'none';
+  }
+})();
+
+// ======== Search & Filter Logic ========
+const state = {
+  categories: [],
+  conditions: [],
+  hostels: [],
+  dept: '',
+  semester: '',
+  priceMax: 25000,
+  sort: 'popular',
+  view: 'grid',
+  page: 1,
+  perPage: 8,
+};
+
+// Pre-select category from URL
+const urlCat = new URLSearchParams(location.search).get('cat');
+const CAT_MAP = { books:'Books', electronics:'Electronics', calculators:'Calculators', furniture:'Furniture', cycles:'Cycles', hostel:'Hostel Essentials', lab:'Lab Equipment', notes:'Notes', gaming:'Gaming Accessories', clothing:'Clothing', instruments:'Musical Instruments' };
+if (urlCat && CAT_MAP[urlCat]){
+  state.categories.push(CAT_MAP[urlCat]);
+  const cb = document.querySelector(`input[name="category"][value="${CAT_MAP[urlCat]}"]`);
+  if (cb) cb.checked = true;
+}
+
+function getFilters() {
+  const filters = {};
+  if (state.categories.length) filters.category = state.categories[0];
+  if (state.conditions.length) filters.condition = state.conditions[0];
+  if (state.hostels.length) filters.hostel = state.hostels[0];
+  if (state.dept) filters.dept = state.dept;
+  if (state.semester) filters.semester = state.semester;
+  if (state.priceMax) filters.priceMax = state.priceMax;
+  filters.sort = state.sort;
+  filters.limit = state.perPage;
+  filters.skip = (state.page - 1) * state.perPage;
+  const q = document.getElementById('nav-search-input')?.value?.trim();
+  if (q) filters.search = q;
+  return filters;
+}
+
+async function render(reset) {
+  if (reset) state.page = 1;
+  const filters = getFilters();
+  try {
+    const products = await getProducts(filters);
+    document.getElementById('result-count').textContent = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
+    await renderProductGrid('results-grid', products);
+    const loadBtn = document.getElementById('load-more-btn');
+    if (products.length < state.perPage) {
+      loadBtn.style.display = 'none';
+    } else {
+      loadBtn.style.display = 'inline-flex';
+    }
+    renderChips();
+  } catch (err) {
+    console.error(err);
+    showToast('Error loading products', 'error');
+  }
+}
+
+function renderChips() {
+  const wrap = document.getElementById('active-chips');
+  const chips = [];
+  state.categories.forEach(c => chips.push({ label:c, kind:'categories', value:c }));
+  state.conditions.forEach(c => chips.push({ label:c, kind:'conditions', value:c }));
+  state.hostels.forEach(c => chips.push({ label:c, kind:'hostels', value:c }));
+  if(state.dept) chips.push({ label: state.dept, kind:'dept', value: state.dept });
+  if(state.semester) chips.push({ label: state.semester, kind:'semester', value: state.semester });
+  wrap.innerHTML = chips.map(c => `
+    <span class="filter-chip" data-kind="${c.kind}" data-value="${c.value}">
+      ${c.label}
+      <button aria-label="Remove filter">✕</button>
+    </span>`).join('');
+  wrap.querySelectorAll('.filter-chip button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const chip = btn.closest('.filter-chip');
+      const kind = chip.dataset.kind, value = chip.dataset.value;
+      if(Array.isArray(state[kind])) state[kind] = state[kind].filter(v => v !== value);
+      else state[kind] = '';
+      syncCheckboxes();
+      render(true);
+    });
+  });
+}
+
+function syncCheckboxes() {
+  document.querySelectorAll('input[name="category"]').forEach(cb => cb.checked = state.categories.includes(cb.value));
+  document.querySelectorAll('input[name="condition"]').forEach(cb => cb.checked = state.conditions.includes(cb.value));
+  document.querySelectorAll('input[name="hostel"]').forEach(cb => cb.checked = state.hostels.includes(cb.value));
+  document.getElementById('filter-dept').value = state.dept;
+  document.getElementById('filter-sem').value = state.semester;
+}
+
+// Event listeners for filters
+document.querySelectorAll('input[name="category"]').forEach(cb => cb.addEventListener('change', () => {
+  state.categories = [...document.querySelectorAll('input[name="category"]:checked')].map(c => c.value);
+  render(true);
+}));
+document.querySelectorAll('input[name="condition"]').forEach(cb => cb.addEventListener('change', () => {
+  state.conditions = [...document.querySelectorAll('input[name="condition"]:checked')].map(c => c.value);
+  render(true);
+}));
+document.querySelectorAll('input[name="hostel"]').forEach(cb => cb.addEventListener('change', () => {
+  state.hostels = [...document.querySelectorAll('input[name="hostel"]:checked')].map(c => c.value);
+  render(true);
+}));
+document.getElementById('filter-dept').addEventListener('change', e => { state.dept = e.target.value; render(true); });
+document.getElementById('filter-sem').addEventListener('change', e => { state.semester = e.target.value; render(true); });
+
+const priceSlider = document.getElementById('price-slider');
+const priceMax = document.getElementById('price-max');
+priceSlider.addEventListener('input', () => { priceMax.value = priceSlider.value; });
+document.getElementById('apply-filters').addEventListener('click', () => {
+  state.priceMax = Number(priceMax.value) || 25000;
+  render(true);
+  document.getElementById('filters-panel').classList.remove('open');
+  document.getElementById('filters-backdrop').style.display = 'none';
+});
+
+document.getElementById('clear-filters').addEventListener('click', () => {
+  state.categories = []; state.conditions = []; state.hostels = []; state.dept=''; state.semester=''; state.priceMax = 25000;
+  priceSlider.value = 25000; priceMax.value = '';
+  document.getElementById('price-min').value = '';
+  syncCheckboxes();
+  render(true);
+});
+
+document.getElementById('sort-select').addEventListener('change', e => { state.sort = e.target.value; render(true); });
+
+const gridBtn = document.getElementById('grid-view-btn');
+const listBtn = document.getElementById('list-view-btn');
+gridBtn.addEventListener('click', () => {
+  gridBtn.classList.add('active'); listBtn.classList.remove('active');
+  document.getElementById('results-grid').classList.remove('list-view');
+});
+listBtn.addEventListener('click', () => {
+  listBtn.classList.add('active'); gridBtn.classList.remove('active');
+  document.getElementById('results-grid').classList.add('list-view');
+});
+
+document.getElementById('nav-search-input').addEventListener('input', () => render(true));
+
+document.getElementById('load-more-btn').addEventListener('click', async () => {
+  const spinner = document.getElementById('load-spinner');
+  const text = document.getElementById('load-more-text');
+  spinner.classList.remove('hidden');
+  text.textContent = 'Loading…';
+  state.page += 1;
+  await render(false);
+  spinner.classList.add('hidden');
+  text.textContent = 'Load more products';
+});
+
+// Mobile filter
+document.getElementById('open-filters').addEventListener('click', () => {
+  document.getElementById('filters-panel').classList.add('open');
+  document.getElementById('filters-backdrop').style.display = 'block';
+});
+document.getElementById('filters-backdrop').addEventListener('click', () => {
+  document.getElementById('filters-panel').classList.remove('open');
+  document.getElementById('filters-backdrop').style.display = 'none';
+});
+
+syncCheckboxes();
+render(true);
+</script>
+</body>
+</html>

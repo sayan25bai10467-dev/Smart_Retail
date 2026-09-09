@@ -1,0 +1,14 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+motor==3.7.0
+pydantic==2.10.6
+pydantic-core==2.27.2
+python-jose[cryptography]==3.4.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.1
+google-auth==2.38.0
+cloudinary==1.44.0
+python-multipart==0.0.20
+requests==2.32.3
+email-validator==2.2.0
+firebase-admin==6.6.0 
